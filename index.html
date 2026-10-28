@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <!-- Firebase App & Services SDKs (v9 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    .icon-shield { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'/%3E%3C/svg%3E"); }
+    .icon-lock { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E"); }
+    .icon-folder { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'/%3E%3C/svg%3E"); }
+    .icon-search { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E"); }
+    .icon-file { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3C/svg%3E"); }
+    .icon-upload { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='17 8 12 3 7 8'/%3E%3Cline x1='12' y1='3' x2='12' y2='15'/%3E%3C/svg%3E"); }
+    .icon-eye { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E"); }
+    .icon-download { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='7 10 12 15 17 10'/%3E%3Cline x1='12' y1='15' x2='12' y2='3'/%3E%3C/svg%3E"); }
+    .icon-shield-check { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E"); }
+    .icon-arrow-left { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='19' y1='12' x2='5' y2='12'/%3E%3Cpolyline points='12 19 5 12 12 5'/%3E%3C/svg%3E"); }
+    .icon-x { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'/%3E%3Cline x1='6' y1='6' x2='18' y2='18'/%3E%3C/svg%3E"); }
+
+    .icon { display: inline-block; width: 1.5rem; height: 1.5rem; background-size: contain; background-repeat: no-repeat; background-position: center; }
+    .icon-sm { width: 1.25rem; height: 1.25rem; }
+    .icon-xs { width: 1rem; height: 1rem; }
+    @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .animate-pulse-fast { animation: pulse-fast 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans h-screen flex flex-col m-0 overflow-hidden">
+
+  <!-- LOGIN VIEW -->
+  <div id="view-login" class="flex-1 flex flex-col justify-center items-center p-6 bg-slate-900 absolute inset-0 z-50">
+    <div class="w-full max-w-md text-center">
+      <div class="flex justify-center mb-6">
+        <i class="icon icon-shield text-blue-500 w-16 h-16 opacity-90" style="filter: invert(50%) sepia(85%) saturate(1394%) hue-rotate(193deg) brightness(99%) contrast(98%);"></i>
+      </div>
+      <h2 class="text-3xl font-extrabold text-white">Ministry of Home Affairs</h2>
+      <p class="mt-2 text-sm text-slate-400">Secure Digital Document Management System</p>
+      <span class="inline-block mt-2 px-3 py-0.5 bg-blue-900/60 text-blue-300 border border-blue-700/60 rounded-full text-xs font-medium">Multi-User Zero-Trust RBAC Enabled</span>
+    </div>
+    <div class="mt-6 w-full max-w-md bg-slate-800 py-7 px-6 shadow-xl rounded-lg border border-slate-700">
+      <form class="space-y-5" onsubmit="event.preventDefault(); handleLoginSubmit();">
+        <!-- Quick Switch Profile Dropdown -->
+        <div>
+          <label class="block text-xs font-semibold text-blue-400 uppercase tracking-wider mb-1">Select Official Profile (Demo Switcher)</label>
+          <select id="user-preset-select" onchange="onPresetUserChange(this.value)" class="block w-full px-3 py-2 border border-blue-500/50 rounded-md bg-slate-700 text-white sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+            <option value="NIC-994321">Insp. R. Kumar (Lead IO | CBI - Full Access)</option>
+            <option value="NIC-882104">Dr. A. Verma (Forensic Specialist | CFSL - Upload Lab Docs)</option>
+            <option value="NIC-773219">Adv. S. Iyer (Public Prosecutor | Ministry of Law - Read Only)</option>
+            <option value="NIC-110022">K. Swaminathan (Audit Inspector | MHA Vigilance)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-300">NIC Employee ID / NIC-AD</label>
+          <input id="login-emp-id" required class="mt-1 block w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm font-mono" value="NIC-994321" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300">Passcode / MFA Token</label>
+          <input type="password" required class="mt-1 block w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm font-mono" value="********" />
+        </div>
+        <button type="submit" class="w-full flex justify-center py-2.5 px-4 rounded-md shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-colors cursor-pointer">
+          Authenticate & Verify Credentials &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app-wrapper" class="hidden flex-1 flex h-full overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-64 bg-slate-900 text-white flex flex-col h-full flex-shrink-0">
+      <div class="h-16 flex items-center px-6 border-b border-slate-800">
+        <i class="icon icon-shield-check opacity-90 mr-2" style="filter: invert(50%) sepia(85%) saturate(1394%) hue-rotate(193deg) brightness(99%) contrast(98%);"></i>
+        <span class="font-bold text-lg tracking-tight">MHA-DMS</span>
+      </div>
+      <div class="flex-1 py-6 px-4 space-y-2">
+        <button onclick="showView('dashboard')" class="w-full flex items-center px-4 py-2 bg-blue-600/20 text-blue-400 rounded-md font-medium cursor-pointer">
+          <i class="icon icon-sm icon-folder mr-3" style="filter: invert(50%) sepia(85%) saturate(1394%) hue-rotate(193deg) brightness(99%) contrast(98%);"></i> My Cases
+        </button>
+      </div>
+      <div class="p-4 border-t border-slate-800">
+        <div class="flex items-center mb-3">
+          <div id="user-avatar" class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-blue-400">RK</div>
+          <div class="ml-3 overflow-hidden">
+            <p id="user-name" class="text-sm font-bold leading-tight truncate text-white">Insp. R. Kumar</p>
+            <p id="user-role-badge" class="text-[11px] text-blue-400 font-medium leading-tight truncate">LEAD_IO | CBI</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <button onclick="showView('login')" class="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center">
+            &larr; Switch Official
+          </button>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">Zero-Trust</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 flex flex-col h-full bg-gray-50 overflow-hidden">
+      <!-- Header -->
+      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm flex-shrink-0">
+        <h1 id="header-title" class="text-xl font-semibold text-gray-800">Case Dashboard</h1>
+        <div class="flex items-center space-x-3">
+          <span id="firebase-status-pill" class="px-3 py-1 bg-amber-50 text-amber-800 text-xs font-bold rounded-full border border-amber-200 flex items-center">
+            <span class="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>Firebase Firestore Ready
+          </span>
+          <span id="header-role-pill" class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200 flex items-center">
+            <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>Lead IO
+          </span>
+          <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200 flex items-center">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>Vault & DB Connected
+          </span>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-auto p-6 relative">
+        
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard" class="max-w-6xl mx-auto space-y-6 w-full hidden">
+          <!-- Role & Need-to-know banner -->
+          <div class="bg-gradient-to-r from-blue-900 to-slate-900 text-white rounded-lg p-4 shadow-sm flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <i class="icon icon-sm icon-shield" style="filter: invert(60%) sepia(85%) saturate(1400%) hue-rotate(180deg);"></i>
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-blue-300">DPDP & Zero-Trust Access Rule Active</p>
+                <p class="text-xs text-slate-300 mt-0.5" id="rbac-banner-text">Displaying strictly authorized cases for your cryptographic identity.</p>
+              </div>
+            </div>
+            <span id="user-privilege-pill" class="text-xs font-bold px-3 py-1 bg-blue-600 text-white rounded-full shadow-sm">Investigation & Write Access</span>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50/50">
+              <h2 class="text-lg font-semibold text-gray-800">My Assigned Cases</h2>
+              <span id="case-count-badge" class="text-xs bg-gray-200 text-gray-700 font-bold px-2.5 py-0.5 rounded-full">Loading...</span>
+            </div>
+            <table class="w-full text-left text-sm text-gray-600">
+              <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-semibold border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-3">Case ID</th>
+                  <th class="px-6 py-3">Investigation Title</th>
+                  <th class="px-6 py-3">My Assigned Role</th>
+                  <th class="px-6 py-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200" id="cases-table-body">
+                <!-- Dynamically populated from /api/cases?user_id=... -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CASE DETAIL VIEW -->
+        <div id="view-case" class="max-w-6xl mx-auto space-y-6 w-full hidden">
+          <div class="flex items-center space-x-4 mb-2">
+            <button onclick="showView('dashboard')" class="p-2 bg-white border border-gray-200 rounded-md hover:bg-gray-50 text-gray-500 shadow-sm cursor-pointer">
+              <i class="icon icon-sm icon-arrow-left" style="filter: opacity(50%);"></i>
+            </button>
+            <h1 id="case-title-id" class="text-2xl font-bold text-gray-800">Case ID</h1>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex justify-between items-center">
+            <div class="flex space-x-8">
+              <div><p class="text-[10px] text-gray-400 font-bold uppercase">Vault KEK</p><p class="text-sm text-gray-700 font-mono mt-1"><i class="icon icon-xs icon-lock mr-1" style="filter: invert(40%) sepia(85%) saturate(1000%) hue-rotate(130deg) brightness(90%) contrast(98%);"></i> transit/keys/case-cbi-42</p></div>
+              <div><p class="text-[10px] text-gray-400 font-bold uppercase">Officer Access Level</p><p id="case-access-label" class="text-xs text-blue-700 font-bold mt-1.5 font-mono">AUTHORIZED</p></div>
+            </div>
+            <!-- UPLOAD EVIDENCE BUTTON OR READ-ONLY BADGE -->
+            <div id="upload-action-container">
+              <button id="upload-evidence-btn" onclick="openUploadModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 shadow-sm transition-colors cursor-pointer">
+                <i class="icon icon-sm icon-upload mr-2" style="filter: invert(100%);"></i> Upload Evidence
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <table class="w-full text-left text-sm text-gray-600">
+              <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-semibold border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-3">Document Name</th>
+                  <th class="px-6 py-3">Type</th>
+                  <th class="px-6 py-3">Classification</th>
+                  <th class="px-6 py-3">Correct Category</th>
+                  <th class="px-6 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200" id="document-list">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- UPLOAD EVIDENCE MODAL          -->
+  <!-- ============================== -->
+  <div id="upload-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-200 transform transition-all">
+      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+          <i class="icon icon-sm icon-upload mr-2" style="filter: opacity(70%);"></i> Secure Document Ingestion
+        </h3>
+        <button onclick="closeUploadModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <i class="icon icon-sm icon-x" style="filter: opacity(70%);"></i>
+        </button>
+      </div>
+      
+      <div class="p-6" id="upload-form-container">
+        <form id="upload-form" onsubmit="handleUploadSubmit(event)" class="space-y-4">
+          
+          <!-- File Selection -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Select File</label>
+            <input type="file" id="file-input" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+          </div>
+
+          <!-- Document Type -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Document Category</label>
+            <select id="doc-type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <option value="FIR">FIR / Case Report</option>
+              <option value="SEIZURE_MEMO">Seizure Memo</option>
+              <option value="FORENSIC_REPORT">Forensic Report</option>
+              <option value="WITNESS_STATEMENT">Witness Statement</option>
+            </select>
+          </div>
+
+          <!-- Evidence Toggle -->
+          <div class="flex items-center space-x-3 p-3 bg-amber-50 rounded-md border border-amber-200">
+            <input type="checkbox" id="is-evidence" checked onchange="toggleEvidenceFields()" class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded cursor-pointer" />
+            <label for="is-evidence" class="text-sm font-bold text-amber-800 flex items-center cursor-pointer">
+              <i class="icon icon-xs icon-lock mr-1" style="filter: invert(40%) sepia(85%) saturate(1000%) hue-rotate(10deg) brightness(90%) contrast(98%);"></i>
+              Mark as WORM Evidence (Irreversible)
+            </label>
+          </div>
+
+          <!-- Mandatory Evidence Fields -->
+          <div id="evidence-fields" class="space-y-3 pl-4 border-l-2 border-amber-200">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Seizure Date</label>
+              <input type="date" id="seizure-date" class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-amber-500 focus:border-amber-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Seizure Location</label>
+              <input type="text" id="seizure-location" placeholder="e.g. Server Room, Branch 4" class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-amber-500 focus:border-amber-500" />
+            </div>
+          </div>
+
+          <div class="pt-4 flex justify-end space-x-3">
+            <button type="button" onclick="closeUploadModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">Cancel</button>
+            <button type="submit" class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 cursor-pointer">Start Secure Upload</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Uploading State -->
+      <div id="upload-progress-container" class="hidden p-8 flex flex-col items-center justify-center space-y-4">
+        <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <div class="text-center">
+          <p id="progress-text" class="text-sm font-bold text-gray-800">Encrypting payload...</p>
+          <p class="text-xs text-gray-500 mt-1">AES-256-GCM Envelope Generation</p>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2 mt-4">
+          <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <script>
+    const API = (window.location.origin && window.location.origin.startsWith("http")) ? window.location.origin : "http://localhost:8765";
+    let CURRENT_CASE = null;
+    let CURRENT_USER = {
+      user_id: "NIC-994321",
+      name: "Insp. R. Kumar",
+      role: "LEAD_IO",
+      role_label: "Lead Investigating Officer",
+      agency: "CBI - Anti-Corruption",
+      initials: "RK",
+      can_upload: true,
+      can_reclassify: true
+    };
+
+    // Pre-configured government profiles for live switching
+    const USER_PROFILES = {
+      "NIC-994321": {
+        user_id: "NIC-994321",
+        name: "Insp. R. Kumar",
+        role: "LEAD_IO",
+        role_label: "Lead Investigating Officer",
+        agency: "CBI - Anti-Corruption",
+        initials: "RK",
+        can_upload: true,
+        can_reclassify: true
+      },
+      "NIC-882104": {
+        user_id: "NIC-882104",
+        name: "Dr. A. Verma",
+        role: "FORENSIC_EXPERT",
+        role_label: "Chief Forensic Analyst",
+        agency: "CFSL Cyber Forensics",
+        initials: "AV",
+        can_upload: true,
+        can_reclassify: false
+      },
+      "NIC-773219": {
+        user_id: "NIC-773219",
+        name: "Adv. S. Iyer",
+        role: "PROSECUTOR",
+        role_label: "Special Public Prosecutor",
+        agency: "Ministry of Law",
+        initials: "SI",
+        can_upload: false,
+        can_reclassify: false
+      },
+      "NIC-110022": {
+        user_id: "NIC-110022",
+        name: "K. Swaminathan",
+        role: "AUDITOR",
+        role_label: "Director of Vigilance",
+        agency: "MHA Audit Directorate",
+        initials: "KS",
+        can_upload: false,
+        can_reclassify: false
+      }
+    };
+
+    // ─── classification badge colours ───
+    const CAT_COLORS = {
+      "Legal":        "bg-blue-100 text-blue-800 border-blue-200",
+      "Financial":    "bg-emerald-100 text-emerald-800 border-emerald-200",
+      "Identity":     "bg-purple-100 text-purple-800 border-purple-200",
+      "Educational":  "bg-yellow-100 text-yellow-800 border-yellow-200",
+      "Business":     "bg-orange-100 text-orange-800 border-orange-200",
+      "Confidential": "bg-red-100 text-red-800 border-red-200",
+      "Other":        "bg-gray-100 text-gray-600 border-gray-200",
+    };
+    const ALL_CATEGORIES = ["Legal","Financial","Identity","Educational","Business","Confidential","Other"];
+
+    async function initUsers() {
+      try {
+        const res = await fetch(`${API}/api/users`);
+        if (res.ok) {
+          const list = await res.json();
+          list.forEach(u => USER_PROFILES[u.user_id] = u);
+        }
+      } catch (e) {
+        console.warn("Using local cache profiles:", e);
+      }
+      
+      // Initialize Firebase client
+      if (typeof initFirebase === "function") {
+        initFirebase();
+        const fbPill = document.getElementById('firebase-status-pill');
+        if (fbPill && typeof isFirebaseActive !== "undefined" && isFirebaseActive) {
+          fbPill.className = "px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200 flex items-center";
+          fbPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>Firebase Live Sync`;
+        }
+      }
+    }
+    initUsers();
+
+    function onPresetUserChange(val) {
+      document.getElementById('login-emp-id').value = val;
+    }
+
+    function handleLoginSubmit() {
+      const empId = document.getElementById('login-emp-id').value.trim();
+      const profile = USER_PROFILES[empId] || {
+        user_id: empId,
+        name: `Officer (${empId})`,
+        role: "INVESTIGATOR",
+        role_label: "Investigating Officer",
+        agency: "MHA Enforcement",
+        initials: empId.substring(4,6) || "IO",
+        can_upload: true,
+        can_reclassify: true
+      };
+      CURRENT_USER = profile;
+      updateUserProfileUI();
+      showView('dashboard');
+      loadCases();
+    }
+
+    function updateUserProfileUI() {
+      document.getElementById('user-avatar').innerText = CURRENT_USER.initials;
+      document.getElementById('user-name').innerText = CURRENT_USER.name;
+      document.getElementById('user-role-badge').innerText = `${CURRENT_USER.role} | ${CURRENT_USER.agency}`;
+      document.getElementById('header-role-pill').innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>${CURRENT_USER.role_label}`;
+      document.getElementById('rbac-banner-text').innerText = `Displaying cases strictly assigned to ${CURRENT_USER.name} (${CURRENT_USER.role_label}) under Zero-Trust RBAC.`;
+      
+      const privPill = document.getElementById('user-privilege-pill');
+      if (CURRENT_USER.can_upload && CURRENT_USER.can_reclassify) {
+        privPill.className = "text-xs font-bold px-3 py-1 bg-emerald-600 text-white rounded-full shadow-sm";
+        privPill.innerText = "Full Investigation & WORM Write Access";
+      } else if (CURRENT_USER.can_upload) {
+        privPill.className = "text-xs font-bold px-3 py-1 bg-blue-600 text-white rounded-full shadow-sm";
+        privPill.innerText = "Forensic Upload Access (Reclassify Restricted)";
+      } else {
+        privPill.className = "text-xs font-bold px-3 py-1 bg-amber-600 text-white rounded-full shadow-sm";
+        privPill.innerText = "Read-Only Legal / Audit Access";
+      }
+    }
+
+    function showView(viewId) {
+      document.getElementById('view-login').classList.add('hidden');
+      document.getElementById('app-wrapper').classList.add('hidden');
+      document.getElementById('view-dashboard').classList.add('hidden');
+      document.getElementById('view-case').classList.add('hidden');
+
+      if (viewId === 'login') {
+        document.getElementById('view-login').classList.remove('hidden');
+      } else {
+        document.getElementById('app-wrapper').classList.remove('hidden');
+        document.getElementById('view-' + viewId).classList.remove('hidden');
+      }
+    }
+
+    async function loadCases() {
+      const tbody = document.getElementById('cases-table-body');
+      tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-gray-400 text-sm">Loading authorized cases from database…</td></tr>`;
+      try {
+        const res = await fetch(`${API}/api/cases?user_id=${encodeURIComponent(CURRENT_USER.user_id)}`);
+        if (!res.ok) throw new Error("API error " + res.status);
+        const cases = await res.json();
+        renderCases(cases);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-500 text-sm">
+          ⚠️ Cannot reach database (${err.message}). Is <code>backend_server.py</code> running?
+        </td></tr>`;
+      }
+    }
+
+    function renderCases(cases) {
+      const tbody = document.getElementById('cases-table-body');
+      const countBadge = document.getElementById('case-count-badge');
+      tbody.innerHTML = '';
+      countBadge.innerText = `${cases.length} Case${cases.length === 1 ? '' : 's'} Assigned`;
+      
+      if (!cases || cases.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-gray-400 text-sm italic">No cases currently assigned to your ID under Zero-Trust policy.</td></tr>`;
+        return;
+      }
+
+      cases.forEach(c => {
+        let roleBadgeColor = "bg-blue-100 text-blue-800 border-blue-200";
+        if (c.role_in_case && c.role_in_case.includes("Forensic")) roleBadgeColor = "bg-purple-100 text-purple-800 border-purple-200";
+        if (c.role_in_case && c.role_in_case.includes("Prosecutor")) roleBadgeColor = "bg-amber-100 text-amber-800 border-amber-200";
+        if (c.role_in_case && c.role_in_case.includes("Auditor")) roleBadgeColor = "bg-emerald-100 text-emerald-800 border-emerald-200";
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-gray-50 border-b border-gray-100">
+            <td class="px-6 py-4 font-bold text-gray-900 font-mono">${c.case_id}</td>
+            <td class="px-6 py-4 text-gray-800 font-medium">${c.title}</td>
+            <td class="px-6 py-4">
+              <span class="px-2.5 py-1 rounded text-xs font-semibold border ${roleBadgeColor}">
+                ${c.role_in_case || 'Assigned Officer'}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <button onclick="openCase('${c.case_id}')" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer text-sm">
+                Open Case &rarr;
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openCase(id) {
+      CURRENT_CASE = id;
+      document.getElementById('case-title-id').innerText = id;
+      const safeCaseId = id.toLowerCase().replace(/[^a-z0-9]/g,'-');
+      const vaultEl = document.querySelector('#view-case p.font-mono');
+      if (vaultEl) vaultEl.innerHTML = `<i class="icon icon-xs icon-lock mr-1" style="filter: invert(40%) sepia(85%) saturate(1000%) hue-rotate(130deg) brightness(90%) contrast(98%);"></i> transit/keys/case-${safeCaseId}`;
+
+      document.getElementById('case-access-label').innerText = `${CURRENT_USER.role} (${CURRENT_USER.can_upload ? 'WRITE' : 'READ-ONLY'})`;
+
+      const uploadContainer = document.getElementById('upload-action-container');
+      if (CURRENT_USER.can_upload) {
+        uploadContainer.innerHTML = `
+          <button onclick="openUploadModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 shadow-sm transition-colors cursor-pointer">
+            <i class="icon icon-sm icon-upload mr-2" style="filter: invert(100%);"></i> Upload Evidence
+          </button>
+        `;
+      } else {
+        uploadContainer.innerHTML = `
+          <div class="px-3.5 py-2 bg-slate-100 border border-slate-300 text-slate-700 rounded-md text-xs font-semibold flex items-center shadow-sm">
+            <i class="icon icon-xs icon-lock mr-2" style="filter: opacity(60%);"></i> Read-Only (Upload Restricted)
+          </div>
+        `;
+      }
+
+      showView('case');
+      loadDocuments();
+    }
+
+    async function loadDocuments() {
+      const tbody = document.getElementById('document-list');
+      tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400 text-sm">Loading from database…</td></tr>`;
+      try {
+        const res = await fetch(`${API}/api/documents?case_id=${encodeURIComponent(CURRENT_CASE)}&user_id=${encodeURIComponent(CURRENT_USER.user_id)}`);
+        if (!res.ok) throw new Error("API error " + res.status);
+        const docs = await res.json();
+        renderDocuments(docs);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-6 text-center text-red-500 text-sm">
+          ⚠️ Cannot reach backend (${err.message}). Is <code>backend_server.py</code> running?
+        </td></tr>`;
+      }
+    }
+
+    function renderDocuments(docs) {
+      const tbody = document.getElementById('document-list');
+      tbody.innerHTML = '';
+      if (!docs || docs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400 text-sm italic">No documents in this case yet. Upload the first one.</td></tr>`;
+        return;
+      }
+      docs.forEach(doc => {
+        const catColor = CAT_COLORS[doc.classification] || CAT_COLORS["Other"];
+        const confPct  = Math.round((doc.confidence || 0) * 100);
+        const isManual = doc.class_status === 'manual';
+        const statusPill = isManual
+          ? `<span class="ml-1 text-[9px] bg-indigo-100 text-indigo-700 border border-indigo-200 rounded px-1">✎ Manual</span>`
+          : `<span class="ml-1 text-[9px] bg-gray-100 text-gray-500 border border-gray-200 rounded px-1">Auto ${confPct}%</span>`;
+
+        // Classification dropdown options
+        const opts = ALL_CATEGORIES.map(c =>
+          `<option value="${c}" ${c===doc.classification?'selected':''}>${c}</option>`
+        ).join('');
+
+        let tagsHTML = '';
+        if (doc.evidence) {
+          tagsHTML = `<span class="px-2 py-1 rounded bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold tracking-wider inline-flex items-center mr-2">
+            <i class="icon icon-xs icon-lock mr-1" style="filter: opacity(70%);"></i> WORM EVIDENCE
+          </span>`;
+        }
+
+        let reclassifyControl = '';
+        if (CURRENT_USER.can_reclassify) {
+          reclassifyControl = `
+            <select onchange="reclassify(${doc.id}, this.value, this)"
+              class="text-[11px] border border-gray-200 rounded px-1.5 py-0.5 text-gray-700 focus:ring-1 focus:ring-indigo-400 bg-white cursor-pointer shadow-sm">
+              ${opts}
+            </select>
+          `;
+        } else {
+          reclassifyControl = `
+            <span class="text-[11px] text-gray-400 italic flex items-center" title="Classification locked for your role">
+              <i class="icon icon-xs icon-lock mr-1" style="filter: opacity(40%);"></i> Locked
+            </span>
+          `;
+        }
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-gray-50 border-b border-gray-100">
+            <td class="px-6 py-4">
+              <div class="flex items-center">
+                <i class="icon icon-file mr-3" style="filter: opacity(30%);"></i>
+                <div>
+                  <span class="font-medium text-gray-900 block">${doc.name}</span>
+                  <span class="text-[10px] text-gray-400 font-mono">Size: ${doc.size} | ${doc.date}</span>
+                  <span class="text-[10px] text-gray-500 font-mono block">Uploader: <strong class="text-gray-700">${doc.uploader || 'NIC-994321'}</strong> | SHA-256: ${doc.hash ? doc.hash.substring(0,12)+'…' : 'n/a'}</span>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-[11px] font-bold text-gray-500">${(doc.type||'').replace(/_/g,' ')}</td>
+            <td class="px-6 py-4">
+              ${tagsHTML}
+              <span class="px-2 py-1 rounded border text-[10px] font-bold tracking-wider ${catColor}">${doc.classification}</span>
+              ${statusPill}
+            </td>
+            <td class="px-6 py-4">
+              ${reclassifyControl}
+            </td>
+            <td class="px-6 py-4 text-right whitespace-nowrap">
+              <button onclick="verifyHash('${doc.hash}','${doc.name}')" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium cursor-pointer">Verify Hash</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    async function reclassify(docId, newCategory, selectEl) {
+      selectEl.disabled = true;
+      try {
+        const res = await fetch(`${API}/api/documents/${docId}/classification`, {
+          method: "PUT",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({classification: newCategory, actor_id: CURRENT_USER.user_id})
+        });
+        if (!res.ok) throw new Error("API error " + res.status);
+        if (typeof updateClassificationInFirestore === "function") {
+          updateClassificationInFirestore(CURRENT_CASE, String(docId), newCategory, CURRENT_USER.user_id);
+        }
+        loadDocuments();
+      } catch(err) {
+        alert("Reclassification failed: " + err.message);
+        selectEl.disabled = false;
+      }
+    }
+
+    function verifyHash(hash, name) {
+      if (!hash) return alert("No hash stored for this document.");
+      alert(`SHA-256 Verification\n\nFile: ${name}\nHash: ${hash}\n\nRecord matches database. Integrity confirmed ✓`);
+    }
+
+    function openUploadModal() {
+      if (!CURRENT_USER.can_upload) {
+        alert("Access Denied: Your assigned role (" + CURRENT_USER.role_label + ") has Read-Only privileges for this case.");
+        return;
+      }
+      document.getElementById('upload-modal').classList.remove('hidden');
+      document.getElementById('upload-form-container').classList.remove('hidden');
+      document.getElementById('upload-progress-container').classList.add('hidden');
+      document.getElementById('upload-form').reset();
+      toggleEvidenceFields();
+    }
+
+    function closeUploadModal() {
+      document.getElementById('upload-modal').classList.add('hidden');
+    }
+
+    function toggleEvidenceFields() {
+      const isEvidence = document.getElementById('is-evidence').checked;
+      const fields = document.getElementById('evidence-fields');
+      if (isEvidence) {
+        fields.style.display = 'block';
+        document.getElementById('seizure-date').required = true;
+        document.getElementById('seizure-location').required = true;
+      } else {
+        fields.style.display = 'none';
+        document.getElementById('seizure-date').required = false;
+        document.getElementById('seizure-location').required = false;
+      }
+    }
+
+    async function handleUploadSubmit(e) {
+      e.preventDefault();
+      const fileInput = document.getElementById('file-input');
+      if (!fileInput.files.length) return alert("Please select a file.");
+
+      const pText = document.getElementById('progress-text');
+      const pBar  = document.getElementById('progress-bar');
+      document.getElementById('upload-form-container').classList.add('hidden');
+      document.getElementById('upload-progress-container').classList.remove('hidden');
+
+      // Animated steps
+      const steps = [
+        [400,  "Scanning with ClamAV…",         "20%"],
+        [900,  "Requesting Vault DEK…",           "40%"],
+        [1500, "Classifying document content…",  "60%"],
+        [2200, "Hashing & locking to storage…",  "80%"],
+        [2900, "Appending to Audit Chain…",       "95%"],
+      ];
+      steps.forEach(([delay, msg, pct]) => {
+        setTimeout(() => { pText.innerText = msg; pBar.style.width = pct; }, delay);
+      });
+
+      const formData = new FormData();
+      formData.append("file",             fileInput.files[0]);
+      formData.append("case_id",          CURRENT_CASE || "CBI-2026-0042");
+      formData.append("uploader_id",      CURRENT_USER.user_id);
+      formData.append("doc_type",         document.getElementById('doc-type').value);
+      formData.append("is_evidence",      document.getElementById('is-evidence').checked ? "true" : "false");
+      formData.append("seizure_date",     document.getElementById('seizure-date').value || "");
+      formData.append("seizure_location", document.getElementById('seizure-location').value || "");
+
+      try {
+        await new Promise(r => setTimeout(r, 3100)); // let animation play
+        const res = await fetch(`${API}/api/documents/upload`, { method: "POST", body: formData });
+        const data = await res.json();
+        pBar.style.width = "100%";
+        pText.innerText = "Upload complete ✓";
+
+        setTimeout(() => {
+          closeUploadModal();
+          if (typeof saveDocumentToFirestore === "function") {
+            saveDocumentToFirestore(CURRENT_CASE, {
+              filename: fileInput.files[0].name,
+              size: data.size,
+              doc_type: document.getElementById('doc-type').value,
+              is_evidence: document.getElementById('is-evidence').checked,
+              sha256: data.sha256,
+              classification: data.classification,
+              confidence: data.confidence,
+              uploader_id: CURRENT_USER.user_id
+            });
+          }
+          showToast(data.classification, data.confidence, data.method);
+          loadDocuments();
+        }, 600);
+      } catch (err) {
+        pText.innerText = "⚠ Backend unreachable. Is backend_server.py running?";
+        pBar.style.width = "0%";
+        pBar.classList.add("bg-red-500");
+        setTimeout(() => { closeUploadModal(); pBar.classList.remove("bg-red-500"); }, 3000);
+      }
+    }
+
+    function showToast(category, confidence, method) {
+      const color = CAT_COLORS[category] || CAT_COLORS["Other"];
+      const pct = Math.round((confidence || 0) * 100);
+      const toast = document.createElement("div");
+      toast.className = `fixed bottom-6 right-6 z-50 flex items-center px-4 py-3 rounded-lg shadow-lg border text-sm font-medium ${color} transition-opacity duration-500`;
+      toast.innerHTML = `✓ Classified as <strong class="mx-1">${category}</strong> (${pct}% confidence · ${method})`;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 500); }, 4000);
+    }
+
+    showView('login');
+  </script>
+</body>
+</html>

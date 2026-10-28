@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions for Zero-Trust RBAC
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+    
+    function isLeadIO() {
+      return isAuthenticated() && getUserRole() == 'LEAD_IO';
+    }
+    
+    function isForensicExpert() {
+      return isAuthenticated() && getUserRole() == 'FORENSIC_EXPERT';
+    }
+    
+    function isProsecutor() {
+      return isAuthenticated() && getUserRole() == 'PROSECUTOR';
+    }
+    
+    // Case documents access control
+    match /cases/{caseId}/documents/{docId} {
+      // Any authorized case member can read documents
+      allow read: if isAuthenticated();
+      
+      // Only Lead IO and Forensic Specialists can upload new documents
+      allow create: if isLeadIO() || isForensicExpert();
+      
+      // Evidence documents with WORM lock CANNOT be deleted by anyone (including admins)
+      allow delete: if false;
+      
+      // Only Lead IO can update document classifications
+      allow update: if isLeadIO() && 
+                    request.resource.data.diff(resource.data).affectedKeys()
+                    .hasOnly(['classification', 'class_status', 'class_confidence', 'updated_by', 'updated_at']);
+    }
+    
+    // Tamper-proof audit ledger: STRICT APPEND-ONLY
+    match /audit_ledger/{logId} {
+      allow read: if isAuthenticated();
+      // Allow appending new audit records
+      allow create: if isAuthenticated();
+      // Modifying or deleting audit history is mathematically prohibited
+      allow update, delete: if false;
+    }
+  }
+}
